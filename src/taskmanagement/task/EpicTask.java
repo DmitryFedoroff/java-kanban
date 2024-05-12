@@ -12,7 +12,7 @@ public class EpicTask extends BaseTask {
     }
 
     public List<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return new ArrayList<>(subtaskIds);
     }
 
     public void addSubtask(int subtaskId) {
@@ -30,7 +30,7 @@ public class EpicTask extends BaseTask {
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
-                ", subtaskIds=" + subtaskIds +
+                ", subtaskIds=" + getSubtaskIds() +
                 '}';
     }
 }
