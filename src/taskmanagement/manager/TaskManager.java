@@ -99,6 +99,24 @@ public class TaskManager {
         }
     }
 
+    public void deleteAllTasks() {
+        tasks.clear();
+    }
+
+    public void deleteAllSubtasks() {
+        subtasks.clear();
+        for (EpicTask epic : epics.values()) {
+            epic.getSubtaskIds().clear();
+        }
+    }
+
+    public void deleteAllEpics() {
+        List<Integer> epicIds = new ArrayList<>(epics.keySet());
+        for (Integer epicId : epicIds) {
+            deleteEpic(epicId);
+        }
+    }
+
     private void updateEpicStatus(EpicTask epic) {
         List<Integer> subtaskIds = epic.getSubtaskIds();
         if (subtaskIds.isEmpty()) {
