@@ -45,13 +45,15 @@ public class TaskManager {
     }
 
     public void addSubtask(Subtask subtask) {
+        EpicTask epic = epics.get(subtask.getEpicId());
+        if (epic == null) {
+            System.out.println("Ошибка: Эпик с ID " + subtask.getEpicId() + " не найден. Подзадача не добавлена.");
+            return;
+        }
         subtask.setId(nextId++);
         subtasks.put(subtask.getId(), subtask);
-        EpicTask epic = epics.get(subtask.getEpicId());
-        if (epic != null) {
-            epic.addSubtask(subtask.getId());
-            updateEpicStatus(epic);
-        }
+        epic.addSubtask(subtask.getId());
+        updateEpicStatus(epic);
     }
 
     public void addEpic(EpicTask epic) {
