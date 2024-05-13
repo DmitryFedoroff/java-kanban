@@ -66,10 +66,16 @@ public class TaskManager {
     }
 
     public void updateSubtask(Subtask subtask) {
-        subtasks.put(subtask.getId(), subtask);
-        EpicTask epic = epics.get(subtask.getEpicId());
-        if (epic != null) {
-            updateEpicStatus(epic);
+        if (subtasks.containsKey(subtask.getId())) {
+            subtasks.put(subtask.getId(), subtask);
+            EpicTask epic = epics.get(subtask.getEpicId());
+            if (epic != null) {
+                updateEpicStatus(epic);
+            } else {
+                System.out.println("Ошибка: Эпик для подзадачи с ID " + subtask.getId() + " не найден.");
+            }
+        } else {
+            System.out.println("Ошибка: Подзадача с ID " + subtask.getId() + " не найдена для обновления.");
         }
     }
 
