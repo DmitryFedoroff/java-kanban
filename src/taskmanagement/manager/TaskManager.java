@@ -134,20 +134,24 @@ public class TaskManager {
 
         boolean allDone = true;
         boolean anyInProgress = false;
+        boolean anyNotDone = false;
 
         for (int subtaskId : subtaskIds) {
             Subtask subtask = subtasks.get(subtaskId);
+            if (subtask.getStatus() == TaskStatus.IN_PROGRESS) {
+                anyInProgress = true;
+            }
             if (subtask.getStatus() != TaskStatus.DONE) {
                 allDone = false;
             }
-            if (subtask.getStatus() == TaskStatus.IN_PROGRESS) {
-                anyInProgress = true;
+            if (subtask.getStatus() == TaskStatus.NEW) {
+                anyNotDone = true;
             }
         }
 
         if (allDone) {
             epic.setStatus(TaskStatus.DONE);
-        } else if (anyInProgress) {
+        } else if (anyInProgress || anyNotDone) {
             epic.setStatus(TaskStatus.IN_PROGRESS);
         } else {
             epic.setStatus(TaskStatus.NEW);
