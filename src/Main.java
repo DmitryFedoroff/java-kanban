@@ -1,9 +1,13 @@
+import taskmanagement.task.BaseTask;
 import taskmanagement.task.SimpleTask;
 import taskmanagement.task.EpicTask;
 import taskmanagement.task.Subtask;
 import taskmanagement.status.TaskStatus;
 import taskmanagement.manager.TaskManager;
 import taskmanagement.manager.InMemoryTaskManager;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -49,6 +53,19 @@ public class Main {
 
         // Выводим задачи после удаления
         printAllTasks(manager);
+
+        // Просмотр задач для создания истории
+        manager.getTaskById(task1.getId());
+        manager.getSubtaskById(subtask1.getId());
+        manager.getEpicById(epic1.getId());
+        manager.getSubtaskById(subtask2.getId());
+        manager.getEpicById(epic2.getId());
+        manager.getTaskById(task2.getId());
+        manager.getSubtaskById(subtask3.getId());
+        manager.getEpicById(epic1.getId());
+
+        // Выводим историю просмотров
+        printHistory(manager);
     }
 
     private static void printAllTasks(TaskManager manager) {
@@ -58,5 +75,15 @@ public class Main {
         manager.getAllEpics().forEach(System.out::println);
         System.out.println("\nВсе подзадачи:");
         manager.getAllSubtasks().forEach(System.out::println);
+    }
+
+    private static void printHistory(TaskManager manager) {
+        System.out.println("\nИстория просмотров:");
+        List<BaseTask> history = manager.getHistory();
+        HashMap<Integer, Integer> viewCounts = ((InMemoryTaskManager) manager).getViewCounts();
+
+        for (BaseTask task : history) {
+            System.out.println(task + " (Просмотров: " + viewCounts.get(task.getId()) + ")");
+        }
     }
 }
