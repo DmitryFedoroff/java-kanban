@@ -3,7 +3,6 @@ package taskmanagement.manager;
 import taskmanagement.task.BaseTask;
 import taskmanagement.task.Subtask;
 import taskmanagement.task.EpicTask;
-
 import java.util.List;
 
 public interface TaskManager {
@@ -25,6 +24,4 @@ public interface TaskManager {
     void deleteAllTasks();
     void deleteAllSubtasks();
     void deleteAllEpics();
-    List<BaseTask> getHistory();
-    int getViewCount(int taskId);
 }
