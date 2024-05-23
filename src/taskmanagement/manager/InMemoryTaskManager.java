@@ -157,16 +157,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
-    public List<BaseTask> getHistory() {
-        return new ArrayList<>(history);
-    }
-
-    @Override
-    public int getViewCount(int taskId) {
-        return viewCounts.getOrDefault(taskId, 0);
-    }
-
     private void updateEpicStatus(EpicTask epic) {
         List<Integer> subtaskIds = epic.getSubtaskIds();
         if (subtaskIds.isEmpty()) {
