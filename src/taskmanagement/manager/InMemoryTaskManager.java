@@ -14,6 +14,8 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, BaseTask> tasks = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HashMap<Integer, EpicTask> epics = new HashMap<>();
+    private final List<BaseTask> history = new ArrayList<>();
+    private final HashMap<Integer, Integer> viewCounts = new HashMap<>(); // Added field
 
     @Override
     public List<BaseTask> getAllTasks() {
@@ -32,17 +34,29 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public BaseTask getTaskById(int id) {
-        return tasks.get(id);
+        BaseTask task = tasks.get(id);
+        if (task != null) {
+            addToHistory(task);
+        }
+        return task;
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        return subtasks.get(id);
+        Subtask subtask = subtasks.get(id);
+        if (subtask != null) {
+            addToHistory(subtask);
+        }
+        return subtask;
     }
 
     @Override
     public EpicTask getEpicById(int id) {
-        return epics.get(id);
+        EpicTask epic = epics.get(id);
+        if (epic != null) {
+            addToHistory(epic);
+        }
+        return epic;
     }
 
     @Override
@@ -143,6 +157,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
+    public List<BaseTask> getHistory() {
+        return new ArrayList<>(history);
+    }
+
     private void updateEpicStatus(EpicTask epic) {
         List<Integer> subtaskIds = epic.getSubtaskIds();
         if (subtaskIds.isEmpty()) {
@@ -174,5 +193,17 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(TaskStatus.NEW);
         }
+    }
+
+    private void addToHistory(BaseTask task) {
+        if (history.size() == 10) {
+            history.remove(0);
+        }
+        history.add(task);
+        viewCounts.put(task.getId(), viewCounts.getOrDefault(task.getId(), 0) + 1); // Update view count
+    }
+
+    public HashMap<Integer, Integer> getViewCounts() {
+        return viewCounts;
     }
 }
