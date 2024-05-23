@@ -4,6 +4,7 @@ import taskmanagement.task.EpicTask;
 import taskmanagement.task.Subtask;
 import taskmanagement.status.TaskStatus;
 import taskmanagement.manager.TaskManager;
+import taskmanagement.manager.HistoryManager;
 import taskmanagement.manager.Managers;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
+        HistoryManager historyManager = Managers.getDefaultHistory();
 
         // Создаем задачи и эпики
         SimpleTask task1 = new SimpleTask("Переезд", "Переехать в новый офис");
@@ -35,28 +37,38 @@ public class Main {
 
         // Вызовы методов и вывод истории
         manager.getTaskById(task1.getId());
-        printHistory(manager);
+        historyManager.add(task1);
+        printHistory(historyManager);
 
         manager.getTaskById(task1.getId()); // Повторный просмотр task1
+        historyManager.add(task1);
         manager.getEpicById(epic1.getId());
-        printHistory(manager);
+        historyManager.add(epic1);
+        printHistory(historyManager);
 
         manager.getSubtaskById(subtask1.getId());
-        printHistory(manager);
+        historyManager.add(subtask1);
+        printHistory(historyManager);
 
         manager.getEpicById(epic2.getId());
-        printHistory(manager);
+        historyManager.add(epic2);
+        printHistory(historyManager);
 
         manager.getTaskById(task2.getId());
-        printHistory(manager);
+        historyManager.add(task2);
+        printHistory(historyManager);
 
         manager.getSubtaskById(subtask3.getId());
-        printHistory(manager);
+        historyManager.add(subtask3);
+        printHistory(historyManager);
 
         manager.getSubtaskById(subtask1.getId()); // Повторный просмотр subtask1
+        historyManager.add(subtask1);
         manager.getSubtaskById(subtask3.getId()); // Повторный просмотр subtask3
+        historyManager.add(subtask3);
         manager.getTaskById(task2.getId()); // Повторный просмотр task2
-        printHistory(manager);
+        historyManager.add(task2);
+        printHistory(historyManager);
 
         // Изменяем статусы и печатаем результаты
         task1.setStatus(TaskStatus.DONE);
@@ -80,16 +92,24 @@ public class Main {
 
         // Просмотр задач для создания истории
         manager.getTaskById(task1.getId());
+        historyManager.add(task1);
         manager.getSubtaskById(subtask1.getId());
+        historyManager.add(subtask1);
         manager.getEpicById(epic1.getId());
+        historyManager.add(epic1);
         manager.getSubtaskById(subtask2.getId());
+        historyManager.add(subtask2);
         manager.getEpicById(epic2.getId());
+        historyManager.add(epic2);
         manager.getTaskById(task2.getId());
+        historyManager.add(task2);
         manager.getSubtaskById(subtask3.getId());
+        historyManager.add(subtask3);
         manager.getEpicById(epic1.getId());
+        historyManager.add(epic1);
 
         // Выводим историю просмотров
-        printHistory(manager);
+        printHistory(historyManager);
     }
 
     private static void printAllTasks(TaskManager manager) {
@@ -101,9 +121,9 @@ public class Main {
         manager.getAllSubtasks().forEach(System.out::println);
     }
 
-    private static void printHistory(TaskManager manager) {
+    private static void printHistory(HistoryManager historyManager) {
         System.out.println("\nИстория просмотров:");
-        List<BaseTask> history = manager.getHistory();
-        history.forEach(task -> System.out.println(task + " (Просмотров: " + manager.getViewCount(task.getId()) + ")"));
+        List<BaseTask> history = historyManager.getHistory();
+        history.forEach(task -> System.out.println(task + " (Просмотров: " + historyManager.getViewCount(task.getId()) + ")"));
     }
 }
