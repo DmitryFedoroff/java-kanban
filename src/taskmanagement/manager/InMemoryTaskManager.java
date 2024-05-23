@@ -15,7 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HashMap<Integer, EpicTask> epics = new HashMap<>();
     private final List<BaseTask> history = new ArrayList<>();
-    private final HashMap<Integer, Integer> viewCounts = new HashMap<>(); // Added field
+    private final HashMap<Integer, Integer> viewCounts = new HashMap<>();
 
     @Override
     public List<BaseTask> getAllTasks() {
@@ -162,6 +162,11 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>(history);
     }
 
+    @Override
+    public int getViewCount(int taskId) {
+        return viewCounts.getOrDefault(taskId, 0);
+    }
+
     private void updateEpicStatus(EpicTask epic) {
         List<Integer> subtaskIds = epic.getSubtaskIds();
         if (subtaskIds.isEmpty()) {
@@ -200,10 +205,6 @@ public class InMemoryTaskManager implements TaskManager {
             history.remove(0);
         }
         history.add(task);
-        viewCounts.put(task.getId(), viewCounts.getOrDefault(task.getId(), 0) + 1); // Update view count
-    }
-
-    public HashMap<Integer, Integer> getViewCounts() {
-        return viewCounts;
+        viewCounts.put(task.getId(), viewCounts.getOrDefault(task.getId(), 0) + 1);
     }
 }
