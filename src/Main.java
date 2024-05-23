@@ -3,10 +3,11 @@ import taskmanagement.task.EpicTask;
 import taskmanagement.task.Subtask;
 import taskmanagement.status.TaskStatus;
 import taskmanagement.manager.TaskManager;
+import taskmanagement.manager.InMemoryTaskManager;
 
 public class Main {
     public static void main(String[] args) {
-        TaskManager manager = new TaskManager();
+        TaskManager manager = new InMemoryTaskManager();
 
         // Создаем задачи и эпики
         SimpleTask task1 = new SimpleTask("Переезд", "Переехать в новый офис");
