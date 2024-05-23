@@ -5,13 +5,14 @@ import taskmanagement.task.Subtask;
 import taskmanagement.status.TaskStatus;
 import taskmanagement.manager.TaskManager;
 import taskmanagement.manager.InMemoryTaskManager;
+import taskmanagement.manager.Managers;
 
 import java.util.HashMap;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        TaskManager manager = new InMemoryTaskManager();
+        TaskManager manager = Managers.getDefault();
 
         // Создаем задачи и эпики
         SimpleTask task1 = new SimpleTask("Переезд", "Переехать в новый офис");
