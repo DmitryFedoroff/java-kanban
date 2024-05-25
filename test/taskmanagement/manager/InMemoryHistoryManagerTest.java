@@ -34,4 +34,22 @@ class InMemoryHistoryManagerTest {
 
         assertEquals("Task", history.get(0).getTitle(), "Title задачи в истории не должен изменяться");
     }
+
+    @Test
+    void testHistorySizeLimit() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        for (int i = 1; i <= 12; i++) {
+            SimpleTask task = new SimpleTask("Task " + i, "Description " + i);
+            task.setId(i);
+            historyManager.add(task);
+        }
+
+        List<BaseTask> history = historyManager.getHistory();
+        assertEquals(10, history.size(), "История должна содержать не более 10 задач");
+
+        for (int i = 3; i <= 12; i++) {
+            assertEquals("Task " + i, history.get(i - 3).getTitle(), "Задача в истории должна соответствовать добавленной");
+        }
+    }
 }
