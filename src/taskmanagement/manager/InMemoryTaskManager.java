@@ -14,8 +14,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, BaseTask> tasks = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HashMap<Integer, EpicTask> epics = new HashMap<>();
-    private final List<BaseTask> history = new ArrayList<>();
-    private final HashMap<Integer, Integer> viewCounts = new HashMap<>();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
     public List<BaseTask> getAllTasks() {
@@ -191,10 +190,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void addToHistory(BaseTask task) {
-        if (history.size() == 10) {
-            history.remove(0);
-        }
-        history.add(task);
-        viewCounts.put(task.getId(), viewCounts.getOrDefault(task.getId(), 0) + 1);
+        historyManager.add(task);
     }
 }
