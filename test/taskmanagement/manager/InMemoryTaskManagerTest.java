@@ -5,6 +5,7 @@ import taskmanagement.task.SimpleTask;
 import taskmanagement.task.BaseTask;
 import taskmanagement.task.EpicTask;
 import taskmanagement.task.Subtask;
+import taskmanagement.status.TaskStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,9 +44,9 @@ class InMemoryTaskManagerTest {
         SimpleTask retrievedTask = (SimpleTask) taskManager.getTaskById(task.getId());
 
         assertEquals(task.getId(), retrievedTask.getId(), "ID задачи должно совпадать");
-        assertEquals(task.getTitle(), retrievedTask.getTitle(), "Title задачи должно совпадать");
-        assertEquals(task.getDescription(), retrievedTask.getDescription(), "Description задачи должно совпадать");
-        assertEquals(task.getStatus(), retrievedTask.getStatus(), "Status задачи должно совпадать");
+        assertEquals(task.getTitle(), retrievedTask.getTitle(), "Название задачи должно совпадать");
+        assertEquals(task.getDescription(), retrievedTask.getDescription(), "Описание задачи должно совпадать");
+        assertEquals(task.getStatus(), retrievedTask.getStatus(), "Статус задачи должен совпадать");
     }
 
     @Test
@@ -66,5 +67,72 @@ class InMemoryTaskManagerTest {
         taskManager.addSubtask(subtask);
         BaseTask retrievedSubtask = taskManager.getSubtaskById(subtask.getId());
         assertNotNull(retrievedSubtask, "Подзадача должна быть найдена");
+    }
+
+    @Test
+    void testDeleteTask() {
+        TaskManager taskManager = Managers.getDefault();
+
+        SimpleTask task = new SimpleTask("Task", "Description");
+        taskManager.addTask(task);
+        int taskId = task.getId();
+
+        taskManager.deleteTask(taskId);
+        BaseTask deletedTask = taskManager.getTaskById(taskId);
+
+        assertNull(deletedTask, "Задача не должна быть найдена после удаления");
+    }
+
+    @Test
+    void testDeleteEpicWithSubtasks() {
+        TaskManager taskManager = Managers.getDefault();
+
+        EpicTask epic = new EpicTask("Epic", "Epic Description");
+        taskManager.addEpic(epic);
+        Subtask subtask1 = new Subtask("Subtask 1", "Subtask 1 Description", epic.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "Subtask 2 Description", epic.getId());
+
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+
+        taskManager.deleteEpic(epic.getId());
+
+        assertNull(taskManager.getEpicById(epic.getId()), "Эпик не должен быть найден после удаления");
+        assertNull(taskManager.getSubtaskById(subtask1.getId()), "Подзадача не должна быть найдена после удаления эпика");
+        assertNull(taskManager.getSubtaskById(subtask2.getId()), "Подзадача не должна быть найдена после удаления эпика");
+    }
+
+    @Test
+    void testSubtaskIdsIntegrityInEpic() {
+        TaskManager taskManager = Managers.getDefault();
+
+        EpicTask epic = new EpicTask("Epic", "Epic Description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask", "Subtask Description", epic.getId());
+        taskManager.addSubtask(subtask);
+
+        taskManager.deleteSubtask(subtask.getId());
+
+        assertFalse(epic.getSubtaskIds().contains(subtask.getId()), "ID подзадачи не должно оставаться в эпике после удаления");
+    }
+
+    @Test
+    void testTaskFieldUpdates() {
+        TaskManager taskManager = Managers.getDefault();
+
+        SimpleTask task = new SimpleTask("Task", "Description");
+        taskManager.addTask(task);
+        int taskId = task.getId();
+
+        task.setTitle("Updated Task");
+        task.setDescription("Updated Description");
+        task.setStatus(TaskStatus.DONE);
+
+        taskManager.updateTask(task);
+        SimpleTask updatedTask = (SimpleTask) taskManager.getTaskById(taskId);
+
+        assertEquals("Updated Task", updatedTask.getTitle(), "Название задачи должно быть обновлено");
+        assertEquals("Updated Description", updatedTask.getDescription(), "Описание задачи должно быть обновлено");
+        assertEquals(TaskStatus.DONE, updatedTask.getStatus(), "Статус задачи должен быть обновлен");
     }
 }
