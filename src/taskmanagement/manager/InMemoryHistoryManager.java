@@ -10,7 +10,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node tail;
     private final HashMap<Integer, Node> nodes = new HashMap<>();
-    private final HashMap<Integer, Integer> viewCounts = new HashMap<>();
 
     private static class Node {
         BaseTask task;
@@ -71,19 +70,16 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(BaseTask task) {
+        if (task == null) return;
         if (nodes.containsKey(task.getId())) {
             removeNode(nodes.get(task.getId()));
         }
         linkLast(task);
-        viewCounts.put(task.getId(), viewCounts.getOrDefault(task.getId(), 0) + 1);
     }
 
     @Override
     public void remove(int id) {
-        if (nodes.containsKey(id)) {
-            removeNode(nodes.get(id));
-            viewCounts.remove(id);
-        }
+        removeNode(nodes.get(id));
     }
 
     @Override

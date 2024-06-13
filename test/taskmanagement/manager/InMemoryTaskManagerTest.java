@@ -135,4 +135,49 @@ class InMemoryTaskManagerTest {
         assertEquals("Updated Description", updatedTask.getDescription(), "Описание задачи должно быть обновлено");
         assertEquals(TaskStatus.DONE, updatedTask.getStatus(), "Статус задачи должен быть обновлен");
     }
+
+    @Test
+    void testSubtaskRemovalIntegrity() {
+        TaskManager taskManager = Managers.getDefault();
+
+        EpicTask epic = new EpicTask("Epic", "Epic Description");
+        taskManager.addEpic(epic);
+        Subtask subtask1 = new Subtask("Subtask 1", "Description 1", epic.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "Description 2", epic.getId());
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+
+        taskManager.deleteSubtask(subtask1.getId());
+        taskManager.deleteSubtask(subtask2.getId());
+
+        assertFalse(epic.getSubtaskIds().contains(subtask1.getId()), "ID подзадачи 1 не должно оставаться в эпике после удаления");
+        assertFalse(epic.getSubtaskIds().contains(subtask2.getId()), "ID подзадачи 2 не должно оставаться в эпике после удаления");
+    }
+
+    @Test
+    void testFieldUpdatesImpactOnManager() {
+        TaskManager taskManager = Managers.getDefault();
+
+        SimpleTask task = new SimpleTask("Task", "Description");
+        taskManager.addTask(task);
+        int taskId = task.getId();
+
+        task.setTitle("Updated Task");
+        task.setDescription("Updated Description");
+        task.setStatus(TaskStatus.DONE);
+
+        SimpleTask updatedTask = (SimpleTask) taskManager.getTaskById(taskId);
+        assertEquals("Updated Task", updatedTask.getTitle(), "Название задачи должно быть обновлено в менеджере");
+        assertEquals("Updated Description", updatedTask.getDescription(), "Описание задачи должно быть обновлено в менеджере");
+        assertEquals(TaskStatus.DONE, updatedTask.getStatus(), "Статус задачи должен быть обновлен в менеджере");
+
+        SimpleTask modifiedTask = new SimpleTask("Modified Task", "Modified Description");
+        modifiedTask.setId(taskId);
+        modifiedTask.setStatus(TaskStatus.NEW);
+
+        updatedTask = (SimpleTask) taskManager.getTaskById(taskId);
+        assertNotEquals(modifiedTask.getTitle(), updatedTask.getTitle(), "Название задачи не должно быть изменено через новый экземпляр");
+        assertNotEquals(modifiedTask.getDescription(), updatedTask.getDescription(), "Описание задачи не должно быть изменено через новый экземпляр");
+        assertNotEquals(modifiedTask.getStatus(), updatedTask.getStatus(), "Статус задачи не должен быть изменен через новый экземпляр");
+    }
 }
