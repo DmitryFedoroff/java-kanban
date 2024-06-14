@@ -33,24 +33,29 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public BaseTask getTaskById(int id) {
-        return tasks.get(id);
+        BaseTask task = tasks.get(id);
+        addToHistory(task);
+        return task;
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        return subtasks.get(id);
+        Subtask subtask = subtasks.get(id);
+        addToHistory(subtask);
+        return subtask;
     }
 
     @Override
     public EpicTask getEpicById(int id) {
-        return epics.get(id);
+        EpicTask epic = epics.get(id);
+        addToHistory(epic);
+        return epic;
     }
 
     @Override
     public void addTask(BaseTask task) {
         task.setId(nextId++);
         tasks.put(task.getId(), task);
-        addToHistory(task);
     }
 
     @Override
@@ -64,14 +69,12 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.put(subtask.getId(), subtask);
         epic.addSubtask(subtask.getId());
         updateEpicStatus(epic);
-        addToHistory(subtask);
     }
 
     @Override
     public void addEpic(EpicTask epic) {
         epic.setId(nextId++);
         epics.put(epic.getId(), epic);
-        addToHistory(epic);
     }
 
     @Override
@@ -150,10 +153,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllEpics() {
-        List<Integer> epicIds = new ArrayList<>(epics.keySet());
-        for (Integer epicId : epicIds) {
-            deleteEpic(epicId);
+        for (EpicTask epic : epics.values()) {
+            for (int subtaskId : epic.getSubtaskIds()) {
+                subtasks.remove(subtaskId);
+                historyManager.remove(subtaskId);
+            }
+            historyManager.remove(epic.getId());
         }
+        epics.clear();
     }
 
     @Override
@@ -199,6 +206,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void addToHistory(BaseTask task) {
-        historyManager.add(task);
+        if (task != null) {
+            historyManager.add(task);
+        }
     }
 }
