@@ -84,6 +84,25 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    void testSubtaskDeletionAndDataIntegrity() {
+        TaskManager taskManager = Managers.getDefault();
+        EpicTask epic = new EpicTask("Epic", "Epic Description");
+        taskManager.addEpic(epic);
+        Subtask subtask1 = new Subtask("Subtask 1", "Subtask 1 Description", epic.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "Subtask 2 Description", epic.getId());
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+
+        taskManager.deleteSubtask(subtask1.getId());
+
+        assertFalse(epic.getSubtaskIds().contains(subtask1.getId()), "ID удалённой подзадачи не должно оставаться в эпике");
+        assertNull(taskManager.getSubtaskById(subtask1.getId()), "Удалённая подзадача не должна быть доступна через менеджер");
+
+        taskManager.deleteSubtask(subtask2.getId());
+        assertTrue(epic.getSubtaskIds().isEmpty(), "В эпике не должно оставаться подзадач после их удаления");
+    }
+
+    @Test
     void testDeleteEpicWithSubtasks() {
         TaskManager taskManager = Managers.getDefault();
 
@@ -179,5 +198,75 @@ class InMemoryTaskManagerTest {
         assertNotEquals(modifiedTask.getTitle(), updatedTask.getTitle(), "Название задачи не должно быть изменено через новый экземпляр");
         assertNotEquals(modifiedTask.getDescription(), updatedTask.getDescription(), "Описание задачи не должно быть изменено через новый экземпляр");
         assertNotEquals(modifiedTask.getStatus(), updatedTask.getStatus(), "Статус задачи не должен быть изменен через новый экземпляр");
+    }
+
+    @Test
+    void testUpdateEpicAndSubtaskStatuses() {
+        TaskManager taskManager = Managers.getDefault();
+
+        EpicTask epic = new EpicTask("Epic", "Epic Description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask", "Description", epic.getId());
+        taskManager.addSubtask(subtask);
+
+        subtask.setStatus(TaskStatus.DONE);
+        taskManager.updateSubtask(subtask);
+        epic = taskManager.getEpicById(epic.getId());
+        assertEquals(TaskStatus.DONE, epic.getStatus(), "Статус эпика должен быть DONE при наличии подзадачи в DONE");
+
+        subtask.setStatus(TaskStatus.IN_PROGRESS);
+        taskManager.updateSubtask(subtask);
+        epic = taskManager.getEpicById(epic.getId());
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика должен быть IN_PROGRESS при наличии подзадачи в IN_PROGRESS");
+
+        taskManager.deleteSubtask(subtask.getId());
+        epic = taskManager.getEpicById(epic.getId());
+        assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус эпика должен быть NEW после удаления всех подзадач");
+    }
+
+    @Test
+    void testEpicStatusWhenAddingSubtasks() {
+        TaskManager taskManager = Managers.getDefault();
+
+        EpicTask epic = new EpicTask("Epic", "Epic Description");
+        taskManager.addEpic(epic);
+        assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус нового эпика должен быть NEW");
+
+        Subtask subtask1 = new Subtask("Subtask 1", "Description 1", epic.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "Description 2", epic.getId());
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+
+        subtask1.setStatus(TaskStatus.IN_PROGRESS);
+        taskManager.updateSubtask(subtask1);
+        epic = taskManager.getEpicById(epic.getId());
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика должен быть IN_PROGRESS при наличии подзадачи в IN_PROGRESS");
+
+        subtask1.setStatus(TaskStatus.DONE);
+        subtask2.setStatus(TaskStatus.DONE);
+        taskManager.updateSubtask(subtask1);
+        taskManager.updateSubtask(subtask2);
+        epic = taskManager.getEpicById(epic.getId());
+        assertEquals(TaskStatus.DONE, epic.getStatus(), "Статус эпика должен быть DONE при всех подзадачах в DONE");
+    }
+
+    @Test
+    void testUpdateNonexistentTask() {
+        TaskManager taskManager = Managers.getDefault();
+
+        SimpleTask task = new SimpleTask("Nonexistent Task", "Description");
+        task.setId(999);
+
+        taskManager.updateTask(task);
+        assertNull(taskManager.getTaskById(999), "Задача не должна быть найдена, так как она не существует в системе");
+    }
+
+    @Test
+    void testDeleteNonexistentTask() {
+        TaskManager taskManager = Managers.getDefault();
+
+        int nonexistentTaskId = 999;
+        taskManager.deleteTask(nonexistentTaskId);
+        assertNull(taskManager.getTaskById(nonexistentTaskId), "Задача не должна быть найдена после попытки удаления несуществующей задачи");
     }
 }
