@@ -8,6 +8,14 @@ public class Subtask extends BaseTask {
         this.epicId = epicId;
     }
 
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (this.epicId == id) {
+            throw new IllegalArgumentException("Подзадача не может быть своим же эпиком");
+        }
+    }
+
     public int getEpicId() {
         return epicId;
     }

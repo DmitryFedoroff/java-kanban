@@ -2,6 +2,8 @@ package taskmanagement.task;
 
 import taskmanagement.status.TaskStatus;
 
+import java.util.Objects;
+
 public abstract class BaseTask {
     protected int id;
     protected String title;
@@ -48,11 +50,27 @@ public abstract class BaseTask {
 
     @Override
     public String toString() {
-        return "Task {" +
-                "ID=" + getId() +
-                ", Title='" + getTitle() + '\'' +
-                ", Description='" + getDescription() + '\'' +
-                ", Status=" + getStatus() +
+        return "BaseTask{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseTask baseTask = (BaseTask) o;
+        return id == baseTask.id &&
+                Objects.equals(title, baseTask.title) &&
+                Objects.equals(description, baseTask.description) &&
+                status == baseTask.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, status);
     }
 }
