@@ -28,12 +28,12 @@ public class EpicTask extends BaseTask {
 
     @Override
     public String toString() {
-        return "EpicTask{" +
-                "id=" + getId() +
-                ", title='" + getTitle() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", status=" + getStatus() +
-                ", subtaskIds=" + getSubtaskIds() +
-                '}';
+        return String.join(",",
+                String.valueOf(getId()),
+                "EPIC",
+                getTitle(),
+                getStatus().name(),
+                getDescription()
+        );
     }
 }

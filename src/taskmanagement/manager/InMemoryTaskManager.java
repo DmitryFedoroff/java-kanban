@@ -208,16 +208,4 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(task);
         }
     }
-
-    protected HashMap<Integer, BaseTask> getTasks() {
-        return tasks;
-    }
-
-    protected HashMap<Integer, Subtask> getSubtasks() {
-        return subtasks;
-    }
-
-    protected HashMap<Integer, EpicTask> getEpics() {
-        return epics;
-    }
 }
