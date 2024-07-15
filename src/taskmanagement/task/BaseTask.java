@@ -1,6 +1,7 @@
 package taskmanagement.task;
 
 import taskmanagement.status.TaskStatus;
+import taskmanagement.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -78,24 +79,16 @@ public abstract class BaseTask {
     }
 
     public String getStartTimeToString() {
-        if (startTime == null) {
-            return "null";
-        }
-        return startTime.format(DATE_TIME_FORMATTER);
+        return TimeUtils.timeToString(startTime);
     }
 
     public String getEndTimeToString() {
-        if (startTime == null) {
-            return "null";
-        }
-        return getEndTime().format(DATE_TIME_FORMATTER);
+        return TimeUtils.timeToString(getEndTime());
     }
 
     public boolean isOverlapping(BaseTask other) {
-        if (this.startTime == null || other.getStartTime() == null) {
-            return false;
-        }
-        return !(this.getEndTime().isBefore(other.getStartTime()) || this.getStartTime().isAfter(other.getEndTime()));
+        return this.startTime != null && other.getStartTime() != null &&
+                !(this.getEndTime().isBefore(other.getStartTime()) || this.getStartTime().isAfter(other.getEndTime()));
     }
 
     @Override
@@ -106,7 +99,7 @@ public abstract class BaseTask {
                 title,
                 status.name(),
                 description,
-                (startTime == null) ? "null" : startTime.format(DATE_TIME_FORMATTER),
+                getStartTimeToString(),
                 String.valueOf(duration.toMinutes())
         );
     }

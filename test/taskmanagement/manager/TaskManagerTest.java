@@ -7,6 +7,7 @@ import taskmanagement.task.BaseTask;
 import taskmanagement.task.EpicTask;
 import taskmanagement.task.SimpleTask;
 import taskmanagement.task.Subtask;
+import taskmanagement.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,9 +27,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void testAddAndFindTaskById() {
-        SimpleTask task = new SimpleTask("Task", "Description");
-        task.setStartTime(LocalDateTime.now().plusMinutes(10));
-        task.setDuration(Duration.ofMinutes(60));
+        SimpleTask task = createSimpleTask("Task", "Description", 10, 60);
         taskManager.addTask(task);
         BaseTask foundTask = taskManager.getTaskById(task.getId());
 
@@ -38,9 +37,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void testUpdateTask() {
-        SimpleTask task = new SimpleTask("Task", "Description");
-        task.setStartTime(LocalDateTime.now().plusMinutes(10));
-        task.setDuration(Duration.ofMinutes(60));
+        SimpleTask task = createSimpleTask("Task", "Description", 10, 60);
         taskManager.addTask(task);
 
         task.setTitle("Updated Task");
@@ -52,9 +49,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void testDeleteTask() {
-        SimpleTask task = new SimpleTask("Task", "Description");
-        task.setStartTime(LocalDateTime.now().plusMinutes(10));
-        task.setDuration(Duration.ofMinutes(60));
+        SimpleTask task = createSimpleTask("Task", "Description", 10, 60);
         taskManager.addTask(task);
         int taskId = task.getId();
 
@@ -69,17 +64,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epic = new EpicTask("Epic", "Description");
         taskManager.addEpic(epic);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", epic.getId());
-        subtask1.setStatus(TaskStatus.NEW);
-        taskManager.addSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", epic.getId());
-        subtask2.setStatus(TaskStatus.DONE);
-        taskManager.addSubtask(subtask2);
-
-        Subtask subtask3 = new Subtask("Subtask 3", "Description", epic.getId());
-        subtask3.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.addSubtask(subtask3);
+        addSubtaskToEpic(epic, "Subtask 1", TaskStatus.NEW);
+        addSubtaskToEpic(epic, "Subtask 2", TaskStatus.DONE);
+        addSubtaskToEpic(epic, "Subtask 3", TaskStatus.IN_PROGRESS);
 
         EpicTask foundEpic = taskManager.getEpicById(epic.getId());
         assertEquals(TaskStatus.IN_PROGRESS, foundEpic.getStatus(), "Статус эпика должен быть IN_PROGRESS при наличии подзадачи в IN_PROGRESS");
@@ -90,25 +77,18 @@ abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epic = new EpicTask("Epic", "Description");
         taskManager.addEpic(epic);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", epic.getId());
-        taskManager.addSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", epic.getId());
-        taskManager.addSubtask(subtask2);
+        addSubtaskToEpic(epic, "Subtask 1", TaskStatus.NEW);
+        addSubtaskToEpic(epic, "Subtask 2", TaskStatus.NEW);
 
         assertEquals(2, taskManager.getSubtasksByEpicId(epic.getId()).size(), "Должно быть две подзадачи в эпике");
     }
 
     @Test
     void testTaskOverlappingValidation() {
-        SimpleTask task1 = new SimpleTask("Task 1", "Description");
-        task1.setStartTime(LocalDateTime.now().plusMinutes(10));
-        task1.setDuration(Duration.ofMinutes(60));
+        SimpleTask task1 = createSimpleTask("Task 1", "Description", 10, 60);
         taskManager.addTask(task1);
 
-        SimpleTask task2 = new SimpleTask("Task 2", "Description");
-        task2.setStartTime(LocalDateTime.now().plusMinutes(30));
-        task2.setDuration(Duration.ofMinutes(60));
+        SimpleTask task2 = createSimpleTask("Task 2", "Description", 30, 60);
 
         assertThrows(IllegalArgumentException.class, () -> taskManager.addTask(task2), "Должно быть исключение при пересечении задач");
     }
@@ -118,13 +98,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epic = new EpicTask("Epic", "Description");
         taskManager.addEpic(epic);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", epic.getId());
-        subtask1.setStatus(TaskStatus.NEW);
-        taskManager.addSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", epic.getId());
-        subtask2.setStatus(TaskStatus.NEW);
-        taskManager.addSubtask(subtask2);
+        addSubtaskToEpic(epic, "Subtask 1", TaskStatus.NEW);
+        addSubtaskToEpic(epic, "Subtask 2", TaskStatus.NEW);
 
         EpicTask foundEpic = taskManager.getEpicById(epic.getId());
         assertEquals(TaskStatus.NEW, foundEpic.getStatus(), "Статус эпика должен быть NEW при всех подзадачах со статусом NEW");
@@ -135,13 +110,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epic = new EpicTask("Epic", "Description");
         taskManager.addEpic(epic);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", epic.getId());
-        subtask1.setStatus(TaskStatus.DONE);
-        taskManager.addSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", epic.getId());
-        subtask2.setStatus(TaskStatus.DONE);
-        taskManager.addSubtask(subtask2);
+        addSubtaskToEpic(epic, "Subtask 1", TaskStatus.DONE);
+        addSubtaskToEpic(epic, "Subtask 2", TaskStatus.DONE);
 
         EpicTask foundEpic = taskManager.getEpicById(epic.getId());
         assertEquals(TaskStatus.DONE, foundEpic.getStatus(), "Статус эпика должен быть DONE при всех подзадачах со статусом DONE");
@@ -152,13 +122,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epic = new EpicTask("Epic", "Description");
         taskManager.addEpic(epic);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", epic.getId());
-        subtask1.setStatus(TaskStatus.NEW);
-        taskManager.addSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", epic.getId());
-        subtask2.setStatus(TaskStatus.DONE);
-        taskManager.addSubtask(subtask2);
+        addSubtaskToEpic(epic, "Subtask 1", TaskStatus.NEW);
+        addSubtaskToEpic(epic, "Subtask 2", TaskStatus.DONE);
 
         EpicTask foundEpic = taskManager.getEpicById(epic.getId());
         assertEquals(TaskStatus.IN_PROGRESS, foundEpic.getStatus(), "Статус эпика должен быть IN_PROGRESS при подзадачах со статусами NEW и DONE");
@@ -169,13 +134,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epic = new EpicTask("Epic", "Description");
         taskManager.addEpic(epic);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", epic.getId());
-        subtask1.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.addSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", epic.getId());
-        subtask2.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.addSubtask(subtask2);
+        addSubtaskToEpic(epic, "Subtask 1", TaskStatus.IN_PROGRESS);
+        addSubtaskToEpic(epic, "Subtask 2", TaskStatus.IN_PROGRESS);
 
         EpicTask foundEpic = taskManager.getEpicById(epic.getId());
         assertEquals(TaskStatus.IN_PROGRESS, foundEpic.getStatus(), "Статус эпика должен быть IN_PROGRESS при всех подзадачах со статусом IN_PROGRESS");
@@ -183,45 +143,58 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void testEmptyHistory() {
-        HistoryManager historyManager = taskManager.getHistoryManager();
-        assertTrue(historyManager.getHistory().isEmpty(), "История задач должна быть пустой");
+        List<BaseTask> history = taskManager.getPrioritizedTasks();
+        assertTrue(history.isEmpty(), "История задач должна быть пустой");
     }
 
     @Test
     void testDuplicateHistory() {
-        HistoryManager historyManager = taskManager.getHistoryManager();
-        SimpleTask task = new SimpleTask("Task", "Description");
-        task.setStartTime(LocalDateTime.now().plusMinutes(10));
-        task.setDuration(Duration.ofMinutes(60));
+        SimpleTask task = createSimpleTask("Task", "Description", 10, 60);
         taskManager.addTask(task);
-        historyManager.add(task);
-        historyManager.add(task);
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
 
-        List<BaseTask> history = historyManager.getHistory();
+        List<BaseTask> history = taskManager.getPrioritizedTasks();
         assertEquals(1, history.size(), "История задач не должна содержать дубликатов");
     }
 
     @Test
     void testRemoveFromHistory() {
-        HistoryManager historyManager = taskManager.getHistoryManager();
-        SimpleTask task1 = new SimpleTask("Task 1", "Description 1");
-        task1.setStartTime(LocalDateTime.now().plusMinutes(10));
-        task1.setDuration(Duration.ofMinutes(60));
-        SimpleTask task2 = new SimpleTask("Task 2", "Description 2");
-        task2.setStartTime(LocalDateTime.now().plusMinutes(70));
-        task2.setDuration(Duration.ofMinutes(60));
+        SimpleTask task1 = createSimpleTask("Task 1", "Description 1", 10, 60);
+        SimpleTask task2 = createSimpleTask("Task 2", "Description 2", 70, 60);
         taskManager.addTask(task1);
         taskManager.addTask(task2);
 
-        historyManager.add(task1);
-        historyManager.add(task2);
-        historyManager.remove(task1.getId());
+        taskManager.getTaskById(task1.getId());
+        taskManager.getTaskById(task2.getId());
+        taskManager.deleteTask(task1.getId());
 
-        List<BaseTask> history = historyManager.getHistory();
+        List<BaseTask> history = taskManager.getPrioritizedTasks();
         assertEquals(1, history.size(), "История задач должна содержать одну задачу после удаления");
         assertEquals(task2, history.getFirst(), "Оставшаяся задача должна быть task2 после удаления task1");
 
-        historyManager.remove(task2.getId());
-        assertTrue(historyManager.getHistory().isEmpty(), "История задач должна быть пустой после удаления всех задач");
+        taskManager.deleteTask(task2.getId());
+        assertTrue(taskManager.getPrioritizedTasks().isEmpty(), "История задач должна быть пустой после удаления всех задач");
+    }
+
+    @Test
+    void testTimeUtils() {
+        LocalDateTime time = LocalDateTime.now();
+        String formattedTime = TimeUtils.timeToString(time);
+
+        assertEquals(time.format(BaseTask.DATE_TIME_FORMATTER), formattedTime, "Время должно быть отформатировано корректно");
+    }
+
+    private SimpleTask createSimpleTask(String title, String description, int startMinutesFromNow, int durationMinutes) {
+        SimpleTask task = new SimpleTask(title, description);
+        task.setStartTime(LocalDateTime.now().plusMinutes(startMinutesFromNow));
+        task.setDuration(Duration.ofMinutes(durationMinutes));
+        return task;
+    }
+
+    private void addSubtaskToEpic(EpicTask epic, String title, TaskStatus status) {
+        Subtask subtask = new Subtask(title, epic.getDescription(), epic.getId());
+        subtask.setStatus(status);
+        taskManager.addSubtask(subtask);
     }
 }

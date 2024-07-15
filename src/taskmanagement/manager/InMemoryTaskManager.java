@@ -254,18 +254,13 @@ public class InMemoryTaskManager implements TaskManager {
         addToPrioritizedTasks(task);
     }
 
+    @Override
     public List<BaseTask> getPrioritizedTasks() {
         return new ArrayList<>(prioritizedTasks);
     }
 
     private boolean isTaskOverlapping(BaseTask task) {
         return prioritizedTasks.stream()
-                .filter(existingTask -> existingTask.getId() != task.getId())
-                .anyMatch(existingTask -> existingTask.isOverlapping(task));
-    }
-
-    @Override
-    public HistoryManager getHistoryManager() {
-        return historyManager;
+                .anyMatch(existingTask -> existingTask.getId() != task.getId() && task.isOverlapping(existingTask));
     }
 }
