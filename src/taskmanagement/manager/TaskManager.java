@@ -1,8 +1,8 @@
 package taskmanagement.manager;
 
 import taskmanagement.task.BaseTask;
-import taskmanagement.task.Subtask;
 import taskmanagement.task.EpicTask;
+import taskmanagement.task.Subtask;
 
 import java.util.List;
 
@@ -44,4 +44,6 @@ public interface TaskManager {
     void deleteAllEpics();
 
     List<Subtask> getSubtasksByEpicId(int epicId);
+
+    List<BaseTask> getPrioritizedTasks();
 }

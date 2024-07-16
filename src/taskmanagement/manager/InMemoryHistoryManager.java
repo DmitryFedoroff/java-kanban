@@ -7,21 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
+    private final HashMap<Integer, Node> nodes = new HashMap<>();
     private Node head;
     private Node tail;
-    private final HashMap<Integer, Node> nodes = new HashMap<>();
-
-    private static class Node {
-        BaseTask task;
-        Node next;
-        Node prev;
-
-        Node(Node prev, BaseTask task, Node next) {
-            this.task = task;
-            this.next = next;
-            this.prev = prev;
-        }
-    }
 
     private void linkLast(BaseTask task) {
         final Node oldTail = tail;
@@ -83,5 +71,17 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<BaseTask> getHistory() {
         return getTasks();
+    }
+
+    private static class Node {
+        BaseTask task;
+        Node next;
+        Node prev;
+
+        Node(Node prev, BaseTask task, Node next) {
+            this.task = task;
+            this.next = next;
+            this.prev = prev;
+        }
     }
 }

@@ -28,6 +28,8 @@ public class Subtask extends BaseTask {
                 getTitle(),
                 getStatus().name(),
                 getDescription(),
+                getStartTimeToString(),
+                String.valueOf(getDuration().toMinutes()),
                 String.valueOf(getEpicId())
         );
     }

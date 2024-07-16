@@ -12,7 +12,9 @@ public class SimpleTask extends BaseTask {
                 "TASK",
                 getTitle(),
                 getStatus().name(),
-                getDescription()
+                getDescription(),
+                getStartTimeToString(),
+                String.valueOf(getDuration().toMinutes())
         );
     }
 }

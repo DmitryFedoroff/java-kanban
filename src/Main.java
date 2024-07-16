@@ -1,11 +1,13 @@
-import taskmanagement.task.BaseTask;
-import taskmanagement.task.SimpleTask;
-import taskmanagement.task.EpicTask;
-import taskmanagement.task.Subtask;
-import taskmanagement.manager.TaskManager;
 import taskmanagement.manager.HistoryManager;
 import taskmanagement.manager.Managers;
+import taskmanagement.manager.TaskManager;
+import taskmanagement.task.BaseTask;
+import taskmanagement.task.EpicTask;
+import taskmanagement.task.SimpleTask;
+import taskmanagement.task.Subtask;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Main {
@@ -15,19 +17,25 @@ public class Main {
 
         // Создаем две задачи
         SimpleTask task1 = new SimpleTask("Задача 1", "Описание задачи 1");
+        task1.setStartTime(LocalDateTime.now().plusMinutes(10));
+        task1.setDuration(Duration.ofMinutes(60));
         SimpleTask task2 = new SimpleTask("Задача 2", "Описание задачи 2");
+        task2.setStartTime(LocalDateTime.now().plusHours(2));
+        task2.setDuration(Duration.ofMinutes(120));
         manager.addTask(task1);
         manager.addTask(task2);
 
-        // Создаем эпик с тремя подзадачами
+        // Создаем эпик с двумя подзадачами
         EpicTask epic1 = new EpicTask("Эпик 1", "Описание эпика 1");
         manager.addEpic(epic1);
         Subtask subtask1 = new Subtask("Подзадача 1", "Описание подзадачи 1", epic1.getId());
+        subtask1.setStartTime(LocalDateTime.now().plusDays(1));
+        subtask1.setDuration(Duration.ofMinutes(30));
         Subtask subtask2 = new Subtask("Подзадача 2", "Описание подзадачи 2", epic1.getId());
-        Subtask subtask3 = new Subtask("Подзадача 3", "Описание подзадачи 3", epic1.getId());
+        subtask2.setStartTime(LocalDateTime.now().plusDays(1).plusHours(1));
+        subtask2.setDuration(Duration.ofMinutes(45));
         manager.addSubtask(subtask1);
         manager.addSubtask(subtask2);
-        manager.addSubtask(subtask3);
 
         // Создаем эпик без подзадач
         EpicTask epic2 = new EpicTask("Эпик 2", "Описание эпика 2");
@@ -72,11 +80,20 @@ public class Main {
 
         // Итоговая история
         printHistory(historyManager);
+
+        // Вывод задач по приоритету
+        printPrioritizedTasks(manager);
     }
 
     private static void printHistory(HistoryManager historyManager) {
         System.out.println("\nИстория просмотров:");
         List<BaseTask> history = historyManager.getHistory();
-        history.forEach(task -> System.out.println(task));
+        history.forEach(System.out::println);
+    }
+
+    private static void printPrioritizedTasks(TaskManager manager) {
+        System.out.println("\nЗадачи по приоритету:");
+        List<BaseTask> prioritizedTasks = manager.getPrioritizedTasks();
+        prioritizedTasks.forEach(System.out::println);
     }
 }
