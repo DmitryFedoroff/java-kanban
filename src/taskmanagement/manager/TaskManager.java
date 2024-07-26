@@ -1,5 +1,6 @@
 package taskmanagement.manager;
 
+import taskmanagement.exceptions.NotFoundException;
 import taskmanagement.task.BaseTask;
 import taskmanagement.task.EpicTask;
 import taskmanagement.task.Subtask;
@@ -13,11 +14,11 @@ public interface TaskManager {
 
     List<EpicTask> getAllEpics();
 
-    BaseTask getTaskById(int id);
+    BaseTask getTaskById(int id) throws NotFoundException;
 
-    Subtask getSubtaskById(int id);
+    Subtask getSubtaskById(int id) throws NotFoundException;
 
-    EpicTask getEpicById(int id);
+    EpicTask getEpicById(int id) throws NotFoundException;
 
     void addTask(BaseTask task);
 
@@ -25,17 +26,17 @@ public interface TaskManager {
 
     void addEpic(EpicTask epic);
 
-    void updateTask(BaseTask task);
+    void updateTask(BaseTask task) throws NotFoundException;
 
-    void updateSubtask(Subtask subtask);
+    void updateSubtask(Subtask subtask) throws NotFoundException;
 
-    void updateEpic(EpicTask epic);
+    void updateEpic(EpicTask epic) throws NotFoundException;
 
-    void deleteTask(int id);
+    void deleteTask(int id) throws NotFoundException;
 
-    void deleteSubtask(int id);
+    void deleteSubtask(int id) throws NotFoundException;
 
-    void deleteEpic(int id);
+    void deleteEpic(int id) throws NotFoundException;
 
     void deleteAllTasks();
 
@@ -43,7 +44,7 @@ public interface TaskManager {
 
     void deleteAllEpics();
 
-    List<Subtask> getSubtasksByEpicId(int epicId);
+    List<Subtask> getSubtasksByEpicId(int epicId) throws NotFoundException;
 
     List<BaseTask> getPrioritizedTasks();
 }
