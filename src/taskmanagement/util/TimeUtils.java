@@ -14,9 +14,6 @@ public class TimeUtils {
     }
 
     public static LocalDateTime stringToTime(String time) {
-        if (time.equals("null")) {
-            return null;
-        }
-        return LocalDateTime.parse(time, DATE_TIME_FORMATTER);
+        return "null".equals(time) ? null : LocalDateTime.parse(time, DATE_TIME_FORMATTER);
     }
 }

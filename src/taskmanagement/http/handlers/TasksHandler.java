@@ -44,7 +44,7 @@ public class TasksHandler extends BaseHttpHandler {
     private void handlePostTasks(HttpExchange exchange) throws IOException {
         SimpleTask task = getTaskFromRequestBody(exchange);
         try {
-            if (task.getId() != 0) {
+            if (task.getId() != null) {
                 taskManager.updateTask(task);
             } else {
                 taskManager.addTask(task);

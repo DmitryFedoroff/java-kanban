@@ -43,7 +43,7 @@ public class SubtasksHandler extends BaseHttpHandler {
     private void handlePostSubtasks(HttpExchange exchange) throws IOException {
         Subtask subtask = getSubtaskFromRequestBody(exchange);
         try {
-            if (subtask.getId() != 0) {
+            if (subtask.getId() != null) {
                 taskManager.updateSubtask(subtask);
             } else {
                 taskManager.addSubtask(subtask);

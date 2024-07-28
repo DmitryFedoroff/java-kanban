@@ -40,21 +40,36 @@ public class EpicsHandler extends BaseHttpHandler {
             Optional<Integer> epicId = getIdFromPath(exchange);
             switch (method) {
                 case "GET":
-                    handleGetEpicById(exchange, epicId);
+                    handleGetEpicById(exchange, epicId.orElse(null));
                     break;
                 case "DELETE":
-                    handleDeleteEpicById(exchange, epicId);
+                    handleDeleteEpicById(exchange, epicId.orElse(null));
                     break;
                 default:
                     badRequestResponse(exchange);
             }
         } else if (splitStrings.length == 4 && splitStrings[3].equals("subtasks")) {
             Optional<Integer> epicId = getIdFromPath(exchange);
-            if (epicId.isPresent()) {
-                handleGetEpicSubtasks(exchange, epicId.get());
-            } else {
-                badRequestResponse(exchange);
-            }
+            epicId.ifPresentOrElse(
+                    id -> {
+                        try {
+                            handleGetEpicSubtasks(exchange, id);
+                        } catch (IOException e) {
+                            try {
+                                errorResponse(exchange, e.getMessage());
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                    },
+                    () -> {
+                        try {
+                            badRequestResponse(exchange);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+            );
         } else {
             badRequestResponse(exchange);
         }
@@ -72,7 +87,7 @@ public class EpicsHandler extends BaseHttpHandler {
     private void handlePostEpics(HttpExchange exchange) throws IOException {
         EpicTask epic = getEpicFromRequestBody(exchange);
         try {
-            if (epic.getId() != 0) {
+            if (epic.getId() != null) {
                 taskManager.updateEpic(epic);
             } else {
                 taskManager.addEpic(epic);
@@ -88,10 +103,10 @@ public class EpicsHandler extends BaseHttpHandler {
         okResponse(exchange, "Все эпики удалены");
     }
 
-    private void handleGetEpicById(HttpExchange exchange, Optional<Integer> epicId) throws IOException {
-        if (epicId.isPresent()) {
+    private void handleGetEpicById(HttpExchange exchange, Integer epicId) throws IOException {
+        if (epicId != null) {
             try {
-                EpicTask epic = taskManager.getEpicById(epicId.get());
+                EpicTask epic = taskManager.getEpicById(epicId);
                 okResponse(exchange, gson.toJson(epic));
             } catch (NotFoundException e) {
                 notFoundResponse(exchange, e.getMessage());
@@ -101,10 +116,10 @@ public class EpicsHandler extends BaseHttpHandler {
         }
     }
 
-    private void handleDeleteEpicById(HttpExchange exchange, Optional<Integer> epicId) throws IOException {
-        if (epicId.isPresent()) {
+    private void handleDeleteEpicById(HttpExchange exchange, Integer epicId) throws IOException {
+        if (epicId != null) {
             try {
-                taskManager.deleteEpic(epicId.get());
+                taskManager.deleteEpic(epicId);
                 okResponse(exchange, "Эпик удален");
             } catch (NotFoundException e) {
                 notFoundResponse(exchange, e.getMessage());

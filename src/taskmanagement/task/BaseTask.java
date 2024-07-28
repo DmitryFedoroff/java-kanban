@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public abstract class BaseTask {
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
-    protected int id;
+    protected Integer id;
     protected String title;
     protected String description;
     protected TaskStatus status;
@@ -23,11 +23,11 @@ public abstract class BaseTask {
         this.status = TaskStatus.NEW;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -109,7 +109,7 @@ public abstract class BaseTask {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BaseTask baseTask = (BaseTask) o;
-        return id == baseTask.id &&
+        return Objects.equals(id, baseTask.id) &&
                 Objects.equals(title, baseTask.title) &&
                 Objects.equals(description, baseTask.description) &&
                 status == baseTask.status &&

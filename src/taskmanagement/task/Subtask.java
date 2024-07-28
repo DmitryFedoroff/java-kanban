@@ -9,7 +9,7 @@ public class Subtask extends BaseTask {
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(Integer id) {
         super.setId(id);
         if (this.epicId == id) {
             throw new IllegalArgumentException("Подзадача не может быть своим же эпиком");
